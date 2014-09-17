@@ -73,13 +73,15 @@ class Dados(object):
 	'''
 	def __init__(self, Rol = Rol()):
 		self.Rol = Rol
-		self._K = 0
-		self.Ik = 0
-		self._At = 1
+		self._K = 0  #incremento ou decremento para o Numero de Clases
+		self._At = 1 #incremento da Amplitude
+		self.tabela = None
+		self.tendenciaCentral = None
+		self.dispercao = None
 
 	#get e set de Amplitude
 	def _get_At(self):
-		return (self.Rol.Rol[-1] - self.Rol.Rol[0]) + _At
+		return (self.Rol.Rol[-1] - self.Rol.Rol[0]) + self._At
 	def _set_At(self, at):
 		self._At = at - (self.Rol.Rol[-1] - self.Rol.Rol[0])
 	At = property(_get_At, _set_At)
@@ -88,54 +90,42 @@ class Dados(object):
 	def _get_K(self):
 		return int(sqrt(len(self.Rol.Rol))) + self._K
 	def _set_K(self, k):
-		self._K = k - int(sqrt(len(self.Rol.Rol)))
+		if int(sqrt(len(self.Rol.Rol)))-1 <= k <= int(sqrt(len(self.Rol.Rol)))+1:
+			self._K = k - int(sqrt(len(self.Rol.Rol)))	
 	K = property(_get_K, _set_K)
 
 
-
-	def _get_Ik(self):
+	#get e set do intervalo de classes
+	@property
+	def Ik(self):
 		if self.At % self.K == 0:
-			return self.At / self.K
-		elif self.At % (self.K + 1) == 0:
-			self.K += 1
-			return self.At / self.K
-		elif self.At % (self.K - 1) == 0:
-			self.K -= 1
 			return self.At / self.K
 		else:
 			self.At +=1
-			self.Ik()
-	def _set_Ik(self):
-		self.At
-	
+			self.Ik
+	@property	
 	def Tabela(self):
-		self.DetectarVariavel()
-		self.MedidaTendenciaCentral = MedidaTendenciaCentral(self.tabela, self.Rol)
+		if self.tabela == None:
+			self.tabela = Tabela(self)
+		return self.tabela
 	
-	def DetectarVariavel(self):
-		laux = []
-		for i in self.Rol.Rol:
-			if not laux.__contains__(i):
-				laux.append(i)
-		if len(laux) > 10:
-			'''
-			Variavel Quantitativa Contínua
-			'''
-			self.variavel = 1
-		elif (float(len(self.Rol.Rol)) / float(len(laux))) < 2:
-			self.variavel = 1
-		else:
-			'''
-			Variável Quantitativa Discreta
-			'''
-			self.variavel = 2
-	
+	@property
+	def TendenciaCentral(self):
+		if self.tendenciaCentral == None:
+			self.tendenciaCentral = MedidaTendenciaCentral(self)
+		return self.tendenciaCentral
+
+	@property
+	def Dispercao(self):
+		if self.dispercao == None:
+			self.dispercao = MedidaDeDispercao(self)
+		return self.dispercao 
 
 class Tabela(object):
-	def __init__(self, Rol, Ik, K):
-		self.Rol = Rol
-		self.K = K
-		self.Ik = Ik
+	def __init__(self, dados):
+		self.Rol = dados.Rol
+		self.K = dados.K
+		self.Ik = dados.Ik
 		self.variavel = 0
 		self.tabela = []
 
@@ -157,6 +147,20 @@ class Tabela(object):
 			print ('  %3d  |  %4d |- %4d  |  %4d  |  %6.3f  |  %3d  |  %7.3f  | %6.2f | %9.2f ') % tupla 
 	
 	def Discreta(self):
+		aux = []
+                for i in self.Rol.Rol:
+                        if i not in aux:
+                                aux.append(i)
+                F = 0
+                _F = 0.0
+                print '  x(i)  |   fi   |   fr %   |   F   |    F %'
+                print '--------+--------+----------+-------+-----------'
+                for i in aux: 
+                        F += self.Rol.Rol.count(i)
+                        _F += float(self.Rol.Rol.count(i))/float(self.lenRol) * 100
+                        print ('  %4d  |  %4d  |  %6.3f  |  %3d  |  %7.3f') % (i, self.Rol.Rol.count(i),  float(self.Rol.Rol.count(i))/float(self.lenRol) * 100, F, _F)
+
+	def DetectarVariavel(self):
 		'''
 		Não foram encontradas referencias em literaturas
 		para esse fim.
@@ -200,13 +204,13 @@ class Tabela(object):
 
 
 class MedidaTendenciaCentral(object):
-	def __init__(self, Tabela, Rol):
+	def __init__(self, dados):
 		self.media = 0
-		self. mediana = 0
-		moda = {'Czuber' : [], 'Pearson' : [], 'King' : [], 'Convencional' : []}
-		self.Tabela = Tabela
-		self.tabela = Tabela.tabela
-		self.Rol = Rol
+		self.mediana = 0
+		self.moda = {'Czuber' : [], 'Pearson' : [], 'King' : [], 'Convencional' : []}
+		self.Tabela = dados.Tabela
+		self.tabela = dados.Tabela.tabela
+		self.Rol = dados.Rol
 	
 	def __repr__(self):
 		return 'Medidas de Tendencia Central'
@@ -295,52 +299,31 @@ class MedidaTendenciaCentral(object):
 			self.moda['Czuber'].append(czuber)
 
 
-def main():
-	print '\n' * 10
-	print "Sistema da Malu =)"
-	print " Series Estatisticas"
-	print '\n' * 2
-	
-	variavel = int(input('Qual o tipo de Variavel "Quantiativa Distcreta"(1) ou "Quantitativa Continua"(2)?'))
-	
-	d = Dados()
-	d.coletaDados()
-	d.Ordenar()
-	
-	if variavel == 2:
-		d.Amplitude()
-		d.IntervaloDeClasse()
-		d.SepararDadosEmClasses()
-		
-		print '\n' * 15
-		
-		print 'Os dados ordenados ficaram assim:\n'
-		print d.Rol
-		print '\n' * 2
-		
-		print 'A apartir disso chegamos aos seguintes valores:\n'
-		print '  | Amplitude:       %4d' % d.At
-		print '  | N. de Classes:   %4d' % d.K
-		print '  | Int. de Classes: %4d' % d.Ik 
-		print '\n' * 2
-		
-		print 'E tambem montamos essa tabela para voce:\n'
-		d.Tabela()
-		
-		print '\n' * 5
-		input('Digite "Enter" para sair...')
-	else:
-		print '\n' * 15
-		
-		print 'Os dados ordenados ficaram assim:\n'
-		print d.Rol
-		print '\n' * 2
-		
-		print 'E tambem montamos essa tabela para voce:\n'
-		d.TabelaVQD()
-		
-		print '\n' * 5
-		input('Digite "Enter" para sair...')
+class MedidaDeDispercao(object):
+	def __init__(self, dados, tipo):
+		self.tipo = tipo
+		self.tabela = dados.tabela.tabela
+		self.media = dados.dispercao.media
+
+	@property
+	def variancia(self):
+		soma = 0
+		n = 0
+		for i in self.tabela:
+			soma += pow(i['xi'] - self.media, 2) * i['fi']
+			n += i['fi']
+		if self.tipo == "Amostra":
+			n -+ 1;
+		return float(soma) / float(n)
+
+	@property
+	def dp(self):
+		return sqrt(self.variancia)
+
+	@property
+	def cv(self):
+		return 100 * float(self.dp)/float(self.media)
+
 
 if __name__ == '__main__':
 	main()
