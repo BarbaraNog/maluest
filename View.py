@@ -4,6 +4,8 @@
 from os import system
 import Malu
 
+limpar = "clear"
+
 def CreateRol():
 	global Rol
 	Cabecalho()
@@ -53,31 +55,36 @@ def TabelaVQD(self):
 
 def Cabecalho():
 	system("clear")
-	print "\n  Sistema da Malu =)               Desenvolvido por: Pedro Ramon"
+	print "\n  MaluEst =)                         Desenvolvido por: Pedro Ramon"
 	print "--------------------------------------------------------------------\n\n"
 
-d = Malu.Dados()
-Rol = d.rol
-opc = "w"
-while (opc not in 'DdCc'):
-	system("clear")
+Rol = []
+while (True):
+	system(limpar)
 	print "===================================================================="
 	print ""
 	print "                         Sistema da Malu =)                         "
 	print ""
-	print "===================================================================="
-	print " \n .Menu:"
-	print '\n'
-
+	print "====================================================================\n"
+	print " | Menu:"
+	print ' +--------------------------------------------------------->\n'
 	print " [D/d] Variável Quantitativa Dicreta (Muita Repetição)"
 	print " [C/c] Variável Quantitativa Continua (Pouca Repetição)"
+	print " [A/a] Detectar no leitura do Rol"
+	print " [L/l] Ler uma tabela"
 	print " [S/s] Sair"
 
 	opc = raw_input("\n >")
+
+	system(limpar)
+
 	if opc.upper() == 'D':
+		
+
+
 		CreateRol()
 		print 'Os dados ordenados ficaram assim:\n'
-		print d.rol
+		print d.rol.Imprimir()
 		print '\n' * 2
 	
 		print 'A apartir disso chegamos aos seguintes valores:\n'
@@ -92,8 +99,6 @@ while (opc not in 'DdCc'):
 		print '\n' * 5
 		input('Digite "Enter" para sair...')
 	elif opc.upper() == 'C':
-		print '\n' * 15
-		
 		print 'Os dados ordenados ficaram assim:\n'
 		print d.rol
 		print '\n' * 2
@@ -103,5 +108,5 @@ while (opc not in 'DdCc'):
 		
 		print '\n' * 5
 	elif opc.upper() == 'S':
-		system("clear")
+		system(limpar)
 		break

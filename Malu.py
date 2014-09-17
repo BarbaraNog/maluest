@@ -208,6 +208,7 @@ class MedidaTendenciaCentral(object):
 		self.media = 0
 		self.mediana = 0
 		self.moda = {'Czuber' : [], 'Pearson' : [], 'King' : [], 'Convencional' : []}
+		self.Dados = dados
 		self.Tabela = dados.Tabela
 		self.tabela = dados.Tabela.tabela
 		self.Rol = dados.Rol
@@ -218,6 +219,7 @@ class MedidaTendenciaCentral(object):
 	def _get_moda(self):
 		return "{'Czuber' : ", moda["Czuber"], ", 'Pearson' : ", moda["Pearson"],", 'King' : ", moda["King"], ", 'Convencional' : ", moda["Convencional"],"}"
 
+	@property
 	def Media(self):
 		'''
 		O Mesmo para Contínua e Discreta
@@ -227,10 +229,10 @@ class MedidaTendenciaCentral(object):
 		for i in self.tabela:
 			Sfi += i['fi']
 			Sxifi += i['xifi']
-		self.media = float(Sxifi)/float(Sfi) 
+		return float(Sxifi)/float(Sfi) 
 	
 	def Mediana(self):
-		if self.Tabela == 1: #Discreta
+		if self.Tabela.variavel == 1: #Discreta
 			if self.Rol.Len % 2 == 1:
 				self.mediana = self.Rol.Rol[(self.Rol.Len / 2) + 1]
 			else:
@@ -259,7 +261,6 @@ class MedidaTendenciaCentral(object):
 	'''
 	def Moda(self):
 		''' Os valores da Media e da Mediana serão necessários para cauculo da Moda de Pearson'''
-		self.Media()
 		self.Mediana()
 		
 		aux = 0
@@ -287,15 +288,15 @@ class MedidaTendenciaCentral(object):
 			self.moda['Convencional'].append(j[k]['xi'])	
 			
 			'''Metodo Pearson'''
-			pearson = ((3 * self.mediana) - (2 * self.media))
+			pearson = ((3 * self.mediana) - (2 * self.Media))
 			self.moda['Pearson'].append(pearson)
 		
 			'''Método de King'''
-			king = (j[k]['I'] + ((float(j[k + 1]['fi'])/float(j[k + 1]['fi'] + j[k - 1]['fi'])) * self.Ik))
+			king = (j[k]['I'] + ((float(j[k + 1]['fi'])/float(j[k + 1]['fi'] + j[k - 1]['fi'])) * self.Dados.Ik))
 			self.moda['King'].append(king)
 			
 			'''Método Czuber'''
-			czuber = (j[k]['I'] + ((float(j[k]['fi'] + j[k - 1]['fi'])/float((2 * j[k]['fi']) - j[k -1]['fi'] - j[k + 1]['fi'])) * self.Ik))
+			czuber = (j[k]['I'] + ((float(j[k]['fi'] + j[k - 1]['fi'])/float((2 * j[k]['fi']) - j[k -1]['fi'] - j[k + 1]['fi'])) * self.Dados.Ik))
 			self.moda['Czuber'].append(czuber)
 
 
