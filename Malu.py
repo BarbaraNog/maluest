@@ -123,13 +123,13 @@ class Dados(object):
 
 class Tabela(object):
 	def __init__(self, dados):
-		self.Rol = dados.Rol
-		self.K = dados.K
-		self.Ik = dados.Ik
+	        self.dados = dados
 		self.variavel = 0
 		self.tabela = []
 
-	def Imprirmir(self):
+	def Imprimir(self):
+	        if self.tabela == []:
+	            self.ClassificaDados()
 		self.DetectarVariavel()
 		if self.variavel == 1:
 			self.Continua()
@@ -166,13 +166,13 @@ class Tabela(object):
 		para esse fim.
 		'''
 		laux = []
-		for i in self.Rol.Rol:
+		for i in self.dados.Rol.Rol:
 			if i not in laux:
 				laux.append(i)
 		if len(laux) > 10:
 			#Variavel Quantitativa Contínua
 			self.variavel = 1
-		elif (float(len(self.Rol.Rol)) / float(len(laux))) < 2:
+		elif (float(len(self.dados.Rol.Rol)) / float(len(laux))) < 2:
 			self.variavel = 1
 		else:
 			#Variável Quantitativa Discreta
@@ -180,23 +180,23 @@ class Tabela(object):
 
 	def ClassificaDados(self):
 		self.tabela = []
-		for i in range(self.K):
+		for i in range(self.dados.K):
 			self.tabela.append({})
 			self.tabela[-1]['K'] = i + 1
-			self.tabela[-1]['I'] = self.Rol.Rol[0] + (self.Ik * i)
-			self.tabela[-1]['S'] = self.tabela[-1]['I'] + self.Ik
+			self.tabela[-1]['I'] = self.dados.Rol.Rol[0] + (self.dados.Ik * i)
+			self.tabela[-1]['S'] = self.tabela[-1]['I'] + self.dados.Ik
 			self.tabela[-1]['fi'] = self.Frequencia(self.tabela[-1]['I'], self.tabela[-1]['S'])
-			self.tabela[-1]['fir'] = (float(self.tabela[-1]['fi']) / float(len(self.Rol.Rol))) * 100
+			self.tabela[-1]['fir'] = (float(self.tabela[-1]['fi']) / float(len(self.dados.Rol.Rol))) * 100
 			self.tabela[-1]['xi'] = float(self.tabela[-1]['I'] + self.tabela[-1]['S'])/2.0
 			self.tabela[-1]['xifi'] = self.tabela[-1]['xi'] * self.tabela[-1]['fi']
 			self.tabela[-1]['F'] = 0
 			for i in self.tabela:
 				self.tabela[-1]['F'] += i['fi']
-			self.tabela[-1]['Fr'] = (float(self.tabela[-1]['F']) / float(len(self.Rol.Rol))) * 100 
+			self.tabela[-1]['Fr'] = (float(self.tabela[-1]['F']) / float(len(self.dados.Rol.Rol))) * 100 
 	
 	def Frequencia(self, I, S):
 		aux = 0;
-		for i in self.Rol.Rol:
+		for i in self.dados.Rol.Rol:
 			if S > i >= I:
 				aux += 1
 		return aux
