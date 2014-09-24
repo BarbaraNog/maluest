@@ -14,11 +14,11 @@ class Rol(object):
 		indice = 'ABCDEFGHIJKLMONPQRSTUVWXYZ'
 		num = 0
 		taux = (indice[num],)
-		val = ' %5d |'
-		vazio = '       |'
+		val = ' %4d |'
+		vazio = '      |'
 		_print = ' %s |'
-		_linha = '---+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+'
-		print '   |   I   |   II  |  III  |   IV  |   V   |   VI  |  VII  |  VIII |   IX  |   X   |'
+		_linha = '---+------+------+------+------+------+------+------+------+------+------+'
+		print '   |  I   |  II  | III  |  IV  |  V   |  VI  | VII  | VIII |  IX  |  X   |'
 		print _linha
 		for i in self.Rol:
 			if len(taux) < 11:
@@ -78,6 +78,7 @@ class Dados(object):
 		self.tabela = None
 		self.tendenciaCentral = None
 		self.dispercao = None
+		self.tipo = "Amostra"
 
 	#get e set de Amplitude
 	def _get_At(self):
@@ -119,7 +120,7 @@ class Dados(object):
 	def Dispercao(self):
 		if self.dispercao == None:
 			self.dispercao = MedidaDeDispercao(self)
-		return self.dispercao 
+		return self.dispercao
 
 class Tabela(object):
 	def __init__(self, dados):
@@ -161,21 +162,15 @@ class Tabela(object):
                         print ('  %4d  |  %4d  |  %6.3f  |  %3d  |  %7.3f') % (i, self.Rol.Rol.count(i),  float(self.Rol.Rol.count(i))/float(self.lenRol) * 100, F, _F)
 
 	def DetectarVariavel(self):
-		'''
-		Não foram encontradas referencias em literaturas
-		para esse fim.
-		'''
 		laux = []
 		for i in self.dados.Rol.Rol:
 			if i not in laux:
 				laux.append(i)
 		if len(laux) > 10:
-			#Variavel Quantitativa Contínua
 			self.variavel = 1
 		elif (float(len(self.dados.Rol.Rol)) / float(len(laux))) < 2:
 			self.variavel = 1
 		else:
-			#Variável Quantitativa Discreta
 			self.variavel = 2
 
 	def ClassificaDados(self):
@@ -205,8 +200,6 @@ class Tabela(object):
 
 class MedidaTendenciaCentral(object):
 	def __init__(self, dados):
-		self.media = 0
-		self.mediana = 0
 		self.moda = {'Czuber' : [], 'Pearson' : [], 'King' : [], 'Convencional' : []}
 		self.Dados = dados
 		self.Tabela = dados.Tabela
@@ -216,8 +209,29 @@ class MedidaTendenciaCentral(object):
 	def __repr__(self):
 		return 'Medidas de Tendencia Central'
 
-	def _get_moda(self):
-		return "{'Czuber' : ", moda["Czuber"], ", 'Pearson' : ", moda["Pearson"],", 'King' : ", moda["King"], ", 'Convencional' : ", moda["Convencional"],"}"
+        def Imprimir(self):
+            self.Moda()
+            print "        +---------------------------------------------+"
+            print "        +----->   Medida de Tendencia Central   <-----+"
+            print "        +---------------------------------------------+"
+            print "        |  -> Media:   %15.8f                |" % self.Media
+            print "        |  -> Mediana: %15.8f                |" % self.Mediana
+            print "        |  -> Moda(s):                                |"
+            print "        |   | -> Convencional:                        |"
+            for i in self.moda["Convencional"]:
+                print "        |   |  |  ->   %15.8f                |" % i
+            print "        |   | -> King:                                |"
+            for i in self.moda["King"]:
+                print "        |   |  |  ->   %15.8f                |" % i
+           
+            print "        |   | -> Pearson:                             |"
+            for i in self.moda["Pearson"]:
+                print "        |   |  |  ->   %15.8f                |" % i
+          
+            print "        |   | -> Czuber:                              |"
+            for i in self.moda["Czuber"]:
+                print "        |   |  |  ->   %15.8f                |" % i
+            print "        +---------------------------------------------+"
 
 	@property
 	def Media(self):
@@ -226,17 +240,18 @@ class MedidaTendenciaCentral(object):
 		'''
 		Sfi = 0
 		Sxifi = 0
-		for i in self.tabela:
+		for i in self.dados.Tabela.tabela:
 			Sfi += i['fi']
 			Sxifi += i['xifi']
 		return float(Sxifi)/float(Sfi) 
 	
+	@property
 	def Mediana(self):
 		if self.Tabela.variavel == 1: #Discreta
-			if self.Rol.Len % 2 == 1:
-				self.mediana = self.Rol.Rol[(self.Rol.Len / 2) + 1]
+			if self.Dados.Rol.Len % 2 == 1:
+				return self.Rol.Rol[(self.Rol.Len / 2) + 1]
 			else:
-				self.mediana = (float(self.Rol.Rol[self.Rol.Len / 2] + self.Rol.Rol[(self.Rol.Len / 2) + 1]) / 2.0)
+			        return (float(self.Rol.Rol[self.Rol.Len / 2] + self.Rol.Rol[(self.Rol.Len / 2) + 1]) / 2.0)
 		else: #Continua
 			posicao = float(len(self.Rol.Rol))/2.0
 			for i in self.tabela:
@@ -250,7 +265,7 @@ class MedidaTendenciaCentral(object):
 			fimd = float(self.tabela[linha - 1]['fi'])
 			Ik = self.Tabela.Ik
 			Md = I + (((posicao - Fant)/fimd)*Ik)
-			self.mediana = Md
+			return Md
 	
 	'''
 	O Metodo Moda, calcula a Moda do Rol, ou seja, o elemento de maior frequência.
@@ -260,9 +275,6 @@ class MedidaTendenciaCentral(object):
 	No metodo de King, a moda segue a formula (Mo = I + (((Fant)/Fant + Fpos) * Ik))
 	'''
 	def Moda(self):
-		''' Os valores da Media e da Mediana serão necessários para cauculo da Moda de Pearson'''
-		self.Mediana()
-		
 		aux = 0
 		linhaMo = 0
 		linhas = []
@@ -288,7 +300,7 @@ class MedidaTendenciaCentral(object):
 			self.moda['Convencional'].append(j[k]['xi'])	
 			
 			'''Metodo Pearson'''
-			pearson = ((3 * self.mediana) - (2 * self.Media))
+			pearson = ((3 * self.Mediana) - (2 * self.Media))
 			self.moda['Pearson'].append(pearson)
 		
 			'''Método de King'''
@@ -301,10 +313,10 @@ class MedidaTendenciaCentral(object):
 
 
 class MedidaDeDispercao(object):
-	def __init__(self, dados, tipo):
-		self.tipo = tipo
-		self.tabela = dados.tabela.tabela
-		self.media = dados.dispercao.media
+	def __init__(self, dados):
+		self.tipo = dados.tipo
+		self.tabela = dados.Tabela.tabela
+		self.media = dados.Dispercao.Media
 
 	@property
 	def variancia(self):

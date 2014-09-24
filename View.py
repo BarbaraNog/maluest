@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from os import system
+from os import system, name
 from Malu import *
 
-limpar = "clear"
+#variáveis globais
 erro = ""
+dados = None
+rol = None
+
+if name.upper() == "NT":
+    limpar = "cls"
+else:
+    limpar = "clear"
+
 
 def CreateRol():
     Rol = []
@@ -90,21 +98,47 @@ while (True):
             print " [V/v] Voltar ao Menu principal:"
             opc = raw_input("\n >")
             if opc.upper() == "R":
+                if rol == None:
+                    erro = "Ops.. acho que não temos um rol para te mostrar!"
                 CabecalhoMini()
-                dados.Rol.Imprimir()
+                if rol != None:
+                    dados.Rol.Imprimir()
                 raw_input("\n\n\n\n\n\n\n\n\n\nPressione 'Enter' para voltar...")
                 pass
             elif opc.upper() == "T":
-                dados.Tabela.Imprimir()
+                if dados == None:
+                    erro = "Ops.. acho que não temos uma tabela para te mostar!"
+                CabecalhoMini()
+                if dados != None:
+                    dados.Tabela.Imprimir()
+                raw_input("\n\n\n\n\n\n\n\n\n\nPressione 'Enter' para voltar...")
                 pass
             elif opc.upper() == "C":
-                print "Não implementado"
+                if dados == None:
+                    erro = "Ops.. acho que não temos esses dados para te mostar!"
+                CabecalhoMini()
+                if dados != None:
+                    dados.TendenciaCentral.Imprimir()
+                raw_input("\n\n\n\n\n\n\n\n\n\nPressione 'Enter' para voltar...")
                 pass
             elif opc.upper() == "D":
-                print " [A/a] Amostra"
-                print " [P/p] População"
+                opc = 'i'
+                while opc not in 'AaPp':
+                    print " Qual o tipo da coleta?"
+                    print " [A/a] Amostra"
+                    print " [P/p] População"
+                    opc = raw_input("\n >")
+                CabecalhoMini()
+                if opc.upper() == "A":
+                    opc = "Amostra"
+                elif opc.upper() == "P":
+                    opc = "Populacao"
+                dados.tipo = opc
+                dados.Dispercao.Imprimir()
             elif opc.upper() == "E":
-                print "Não implementado"
+                erro = "Não implementado"
+                CabecalhoMini()
+                raw_input("\n\n\n\n\n\n\n\n\n\nPressione 'Enter' para voltar...")
                 pass 
             elif opc.upper() == "V":
                 opc = "i"
@@ -115,10 +149,11 @@ while (True):
                     opc = raw_input("\n >")
                 if opc.upper() == "S":
                     system(limpar)
+                    dados= None
+                    rol = None
                     break
                 elif opc.upper() == "N":
                     pass
-    
     #Sair do Maluest
     elif opc.upper() == 'S':
         opc = "i"
@@ -131,6 +166,9 @@ while (True):
             break
         elif opc.upper() == 'N':
             pass
+
+    else:
+        erro = "Digite uma opção válida!"
 
 '''    if opc.upper() == 'D':
         CreateRol()
