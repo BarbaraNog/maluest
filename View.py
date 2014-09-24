@@ -18,9 +18,12 @@ else:
 def CreateRol():
     Rol = []
     CabecalhoMini()
-    lenRol = int(raw_input(' Tamanho da coleção: > '))
+    try:
+        lenRol = int(raw_input(' Tamanho da coleção: > '))
+    except:
+        lenRol = 0
     if lenRol == 0:
-        lenRol = 1000
+        lenRol = 100000
     print " .Leitura dos dados:"
     for i in range(lenRol):
         try:
@@ -30,11 +33,82 @@ def CreateRol():
     return Rol
 
 def TabelaDiscreta():
-    erro = "Não Implementado"
-    pass
+    global erro
+    K = 0
+    while K < 1:
+        CabecalhoMini()
+        print ' Quantos Dados (linhas) tem nossa tabela?'
+        K = int(raw_input("\n >"))
+        if K < 1:
+            erro = "Ops.. não acredito que ela tenha " + str(K) + " linhas! Tente de novo!"
+
+    CabecalhoMini()
+    print ' Perfeito! Agora para terminar, me passeos x(i) e as frequencias (fi):'
+    print '  ~Comece pela primeira linha, e continue em ordem ate a ultima!'
+    print '  ~Digite um numero e pressione Enter:\n\n'
+    fi = []
+    xi =[]
+    for i in range(K):
+        n = ''
+        while n.__class__ != int:
+            n = raw_input( "xi da " + str(i + 1) + "º linha: ")
+            try:
+                n = int(n)
+                xi.append(n)
+            except:
+                print "\n\n * Ops.. o xi deve ser um Numero!"
+        n = ''
+        while n.__class__ != int:
+            n = raw_input( "f(i) da " + str(i + 1) + "º linha: ")
+            try:
+                n = int(n)
+                fi.append(n)
+            except:
+                print "\n\n * Ops.. o xi deve ser um Numero!"
+    parametros = [K, xi, fi]
+    return parametros
 
 def TabelaContinua():
-    erro = "Não Implementado"
+    global erro
+    K = 0
+    while K < 1:
+        CabecalhoMini()
+        print ' Quantas Classes (linhas) tem nossa tabela?'
+        K = int(raw_input("\n >"))
+        if K < 1:
+            erro = "Ops.. não acredito que ela tenha " + str(K) + " linhas! Tente de novo!"
+
+    CabecalhoMini()
+    print ' Certo! E qual o Intervalo INFERIOR da PRIMEIRA Classe (linha)?'
+    print ' (Ex ->   25 |--- 39  -> Neste caso seria 25)'
+    I = int(raw_input("\n >"))
+
+    S = 0
+    while S <= I:
+        CabecalhoMini()
+        print ' Muito Bem! E o intervalo SUPERIOR da ULTIMA Classe (Linha)?'
+        print ' (Ex ->   87 |--- 99  -> Neste caso seria 99)'
+        S = int(raw_input("\n >"))
+        if S <= I:
+            erro = "Ops.. seu Intervalo Superior deve ser Maior que '" + str(I) + "' (Inferior)!"
+
+    CabecalhoMini()
+    print ' Perfeito! Agora para terminar, me passe as frequencias (fi):'
+    print '  ~Comece pela primeira linha, e continue em ordem ate a ultima!'
+    print '  ~Digite um numero e pressione Enter:\n\n'
+    fi = []
+    for i in range(K):
+        n = ''
+        while n.__class__ != int:
+            n = raw_input( str(i + 1) + "º linha: ")
+            try:
+                n = int(n)
+                fi.append(n)
+            except:
+                print "\n\n * Ops.. o intervalo deve ser um Numero!"
+    parametros = [K, I, S, fi]
+    return parametros
+
 
 def CabecalhoMini():
     global erro
@@ -81,9 +155,13 @@ while (True):
                 rol = Rol(r)
                 dados = Dados(rol)
             elif opc.upper() == "D":
-                TabelaDiscreta()
+                p = TabelaDiscreta()
+                dados = Dados()
+                dados.LerTabelaD(p[0], p[1], p[2])
             elif opc.upper() == "C":
-                TabelaContinua()
+                p = TabelaContinua()
+                dados = Dados()
+                dados.LerTabelaC(p[0], p[1], p[2], p[3])
             else:
                 erro = "Escolha uma opção Válida!"
         while(True):
@@ -103,7 +181,7 @@ while (True):
                 CabecalhoMini()
                 if rol != None:
                     dados.Rol.Imprimir()
-                raw_input("\n\n\n\n\n\n\n\n\n\nPressione 'Enter' para voltar...")
+                raw_input("\n\n\nPressione 'Enter' para voltar...")
                 pass
             elif opc.upper() == "T":
                 if dados == None:
@@ -111,7 +189,7 @@ while (True):
                 CabecalhoMini()
                 if dados != None:
                     dados.Tabela.Imprimir()
-                raw_input("\n\n\n\n\n\n\n\n\n\nPressione 'Enter' para voltar...")
+                raw_input("\n\n\nPressione 'Enter' para voltar...")
                 pass
             elif opc.upper() == "C":
                 if dados == None:
@@ -119,7 +197,7 @@ while (True):
                 CabecalhoMini()
                 if dados != None:
                     dados.TendenciaCentral.Imprimir()
-                raw_input("\n\n\n\n\n\n\n\n\n\nPressione 'Enter' para voltar...")
+                raw_input("\n\n\nPressione 'Enter' para voltar...")
                 pass
             elif opc.upper() == "D":
                 opc = 'i'
@@ -135,10 +213,11 @@ while (True):
                     opc = "Populacao"
                 dados.tipo = opc
                 dados.Dispercao.Imprimir()
+                raw_input("\n\n\nPressione 'Enter' para voltar...")
             elif opc.upper() == "E":
                 erro = "Não implementado"
                 CabecalhoMini()
-                raw_input("\n\n\n\n\n\n\n\n\n\nPressione 'Enter' para voltar...")
+                raw_input("\n\n\nPressione 'Enter' para voltar...")
                 pass 
             elif opc.upper() == "V":
                 opc = "i"
@@ -149,7 +228,9 @@ while (True):
                     opc = raw_input("\n >")
                 if opc.upper() == "S":
                     system(limpar)
-                    dados= None
+                    del(dados)
+                    dados = None
+                    del(rol)
                     rol = None
                     break
                 elif opc.upper() == "N":
@@ -169,34 +250,3 @@ while (True):
 
     else:
         erro = "Digite uma opção válida!"
-
-'''    if opc.upper() == 'D':
-        CreateRol()
-        r = Rol(Rol)
-        print 'Os dados ordenados ficaram assim:\n'
-        print r.Imprimir()
-        print '\n' * 2
-    
-        print 'A apartir disso chegamos aos seguintes valores:\n'
-        print '  | Amplitude:       %4d' % d.At
-        print '  | N. de Classes:   %4d' % d.K
-        print '  | Int. de Classes: %4d' % d.Ik 
-        print '\n' * 2
-        
-        print 'E tambem montamos essa tabela para voce:\n'
-        d.Tabela()
-        
-        print '\n' * 5
-        input('Digite "Enter" para sair...')
-    elif opc.upper() == 'C':
-        print 'Os dados ordenados ficaram assim:\n'
-        print d.rol
-        print '\n' * 2
-        
-        print 'E tambem montamos essa tabela para voce:\n'
-        d.TabelaVQD()
-        
-        print '\n' * 5
-    elif opc.upper() == 'S':
-        system(limpar)
-        break'''

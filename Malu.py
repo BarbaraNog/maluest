@@ -2,12 +2,24 @@
 #-*- coding: utf-8 -*-
 
 from math import sqrt
+from random import randint
 
 class Rol(object):
-	def __init__(self, Rol = []):
+	def __init__(self, Rol = None):
 		self.Rol = Rol
-		self.Ordenar()
-		self.Len = len(self.Rol)
+		if self.Rol != None:
+		    self.Ordenar()
+		self._len = 0
+	
+	def _get_Len(self):
+	    if self.Rol != None:
+	        return len(self.Rol)
+	    else:
+	        return self._len
+        def _set_Len(self, _len):
+            if self.Rol == None:
+                self._len = _len
+        Len = property(_get_Len, _set_Len)
 
 	#Vai para a view
 	def Imprimir(self):
@@ -38,30 +50,31 @@ class Rol(object):
 			print _print % taux
 			print _linha	
 
-	def Inserir(self, Rol):
+	def SubstituirRol(self, Rol):
 		self.__init__(Rol)
+
+	def Inserir(self, Rol):
+	        self.Rol.extend(Rol)
 
 	def Ordenar(self):
 		self.Rol.sort()
 	
-	def Alterar(self, posicao, valor):
-		if posicao < self.Len:
-			self.Rol[posicao -1] = valor
+	def Alterar(self, antigo, novo):
+		if antingo in self.Rol:
+			self.Rol[self.Rol.index(antigo)] = novo
 			return True
 		else:
 			return False
 	
-	def Remover(self, posicao):
-		if posicao < self.Len:
-			self.Rol.__delitem__(posicao -1)
-			self.Len = len(self.Len)
+	def Remover(self, antigo):
+		if antigo in self.Rol:
+			self.Rol.__delitem__(self.Rol.index(antigo))
 			return True
 		else:
 			return False
 
 	def Adicionar(self, valor):
 		self.Rol.append(valor)
-		self.Len = len(self.Len)
 '''
 implementar:
 	auto detctar o tipo da variável (Discreta ou Contínua)
@@ -89,21 +102,48 @@ class Dados(object):
 	
 	#get e set do Numero de Classes
 	def _get_K(self):
-		return int(sqrt(len(self.Rol.Rol))) + self._K
+		return int(sqrt(self.Rol.Len)) + self._K
 	def _set_K(self, k):
-		if int(sqrt(len(self.Rol.Rol)))-1 <= k <= int(sqrt(len(self.Rol.Rol)))+1:
-			self._K = k - int(sqrt(len(self.Rol.Rol)))	
+		if int(sqrt(self.Rol.Len))-1 <= k <= int(sqrt(self.Rol.Len))+1:
+			self._K = k - int(sqrt(self.Rol.Len))	
 	K = property(_get_K, _set_K)
 
 
 	#get e set do intervalo de classes
 	@property
 	def Ik(self):
+	        while self.At % self.K != 0:
+	            self.At += 1
 		if self.At % self.K == 0:
 			return self.At / self.K
-		else:
-			self.At +=1
-			self.Ik
+        
+        def LerTabelaD(self, K, xi = [], fi = []):
+            if len(fi) > 0 and len(xi) == len(fi):
+                self.Rol.Rol = []
+                for i in fi:
+                    for j in range(i):
+                        self.Rol.Rol.append(i)
+                self.Rol.Ordenar()
+
+	def LerTabelaC(self, K, I, S, fi = []):
+	    if len(fi) > 0:
+	        At = S-I
+	        Ik = At/K
+	        i = I
+	        self.Rol.Rol = []
+	        for k in fi:
+	            self.Rol.Rol.append(i)
+	            i += Ik
+	        i = I
+	        for k in fi:
+	            for j in range(k-1):
+	                #O randint é só pra dar um charme =D
+	                self.Rol.Rol.append(randint(i, i+Ik-1))
+	            i += Ik
+	        self.Rol.Ordenar()
+	        self.At = At
+	        self.K = K
+
 	@property	
 	def Tabela(self):
 		if self.tabela == None:
@@ -125,21 +165,24 @@ class Dados(object):
 class Tabela(object):
 	def __init__(self, dados):
 	        self.dados = dados
-		self.variavel = 0
-		self.tabela = []
+		self.variavel = None
+		self._tabela = []
+
+        @property
+        def tabela(self):
+                self.ClassificaDados()
+                return self._tabela
 
 	def Imprimir(self):
-	        if self.tabela == []:
-	            self.ClassificaDados()
-		self.DetectarVariavel()
+	        if self.variavel == None:
+	            self.DetectarVariavel()
 		if self.variavel == 1:
 			self.Continua()
 		elif self.variavel == 2:
 			self.Discreta()
 		else:
 			print 'Ops.. não conseguimos identificar se essa variável é Discreta ou Contínua'
-
-
+        
 	def Continua(self):
 		print '  Cls  |  Int. Classes  |   fi   |   fr %   |   F   |    F %    |   xi   |   xi X fi'
 		print '-------+----------------+--------+----------+-------+-----------+--------+----------'
@@ -149,17 +192,19 @@ class Tabela(object):
 	
 	def Discreta(self):
 		aux = []
-                for i in self.Rol.Rol:
+                for i in self.dados.Rol.Rol:
                         if i not in aux:
                                 aux.append(i)
                 F = 0
                 _F = 0.0
-                print '  x(i)  |   fi   |   fr %   |   F   |    F %'
-                print '--------+--------+----------+-------+-----------'
+                print '  x(i)  |   fi   |   fr %   |   F   |    F %    |   xi X fi'
+                print '--------+--------+----------+-------+-----------+----------'
                 for i in aux: 
-                        F += self.Rol.Rol.count(i)
+			tupla = (i['xi'], i['fi'], i['fr'], i['F'], i['Fr'], i['xifi'])
+                        print ('  %4d  |  %4d  |  %6.3f  |  %3d  |  %7.3f  | %9.2f ') % tupla
+                        '''F += self.Rol.Rol.count(i)
                         _F += float(self.Rol.Rol.count(i))/float(self.lenRol) * 100
-                        print ('  %4d  |  %4d  |  %6.3f  |  %3d  |  %7.3f') % (i, self.Rol.Rol.count(i),  float(self.Rol.Rol.count(i))/float(self.lenRol) * 100, F, _F)
+                        print ('  %4d  |  %4d  |  %6.3f  |  %3d  |  %7.3f') % (i, self.Rol.Rol.count(i),  float(self.Rol.Rol.count(i))/float(self.lenRol) * 100, F, _F)'''
 
 	def DetectarVariavel(self):
 		laux = []
@@ -174,20 +219,20 @@ class Tabela(object):
 			self.variavel = 2
 
 	def ClassificaDados(self):
-		self.tabela = []
+		self._tabela = []
 		for i in range(self.dados.K):
-			self.tabela.append({})
-			self.tabela[-1]['K'] = i + 1
-			self.tabela[-1]['I'] = self.dados.Rol.Rol[0] + (self.dados.Ik * i)
-			self.tabela[-1]['S'] = self.tabela[-1]['I'] + self.dados.Ik
-			self.tabela[-1]['fi'] = self.Frequencia(self.tabela[-1]['I'], self.tabela[-1]['S'])
-			self.tabela[-1]['fir'] = (float(self.tabela[-1]['fi']) / float(len(self.dados.Rol.Rol))) * 100
-			self.tabela[-1]['xi'] = float(self.tabela[-1]['I'] + self.tabela[-1]['S'])/2.0
-			self.tabela[-1]['xifi'] = self.tabela[-1]['xi'] * self.tabela[-1]['fi']
-			self.tabela[-1]['F'] = 0
-			for i in self.tabela:
-				self.tabela[-1]['F'] += i['fi']
-			self.tabela[-1]['Fr'] = (float(self.tabela[-1]['F']) / float(len(self.dados.Rol.Rol))) * 100 
+			self._tabela.append({})
+			self._tabela[-1]['K'] = i + 1
+			self._tabela[-1]['I'] = self.dados.Rol.Rol[0] + (self.dados.Ik * i)
+			self._tabela[-1]['S'] = self._tabela[-1]['I'] + self.dados.Ik
+			self._tabela[-1]['fi'] = self.Frequencia(self._tabela[-1]['I'], self._tabela[-1]['S'])
+			self._tabela[-1]['fir'] = (float(self._tabela[-1]['fi']) / float(len(self.dados.Rol.Rol))) * 100
+			self._tabela[-1]['xi'] = float(self._tabela[-1]['I'] + self._tabela[-1]['S'])/2.0
+			self._tabela[-1]['xifi'] = self._tabela[-1]['xi'] * self._tabela[-1]['fi']
+			self._tabela[-1]['F'] = 0
+			for i in self._tabela:
+				self._tabela[-1]['F'] += i['fi']
+			self._tabela[-1]['Fr'] = (float(self._tabela[-1]['F']) / float(len(self.dados.Rol.Rol))) * 100 
 	
 	def Frequencia(self, I, S):
 		aux = 0;
@@ -240,7 +285,7 @@ class MedidaTendenciaCentral(object):
 		'''
 		Sfi = 0
 		Sxifi = 0
-		for i in self.dados.Tabela.tabela:
+		for i in self.Dados.Tabela.tabela:
 			Sfi += i['fi']
 			Sxifi += i['xifi']
 		return float(Sxifi)/float(Sfi) 
@@ -253,7 +298,7 @@ class MedidaTendenciaCentral(object):
 			else:
 			        return (float(self.Rol.Rol[self.Rol.Len / 2] + self.Rol.Rol[(self.Rol.Len / 2) + 1]) / 2.0)
 		else: #Continua
-			posicao = float(len(self.Rol.Rol))/2.0
+			posicao = float(self.Rol.Len)/2.0
 			for i in self.tabela:
 				if posicao <= i['F']:
 					linha = i['K']
@@ -263,7 +308,7 @@ class MedidaTendenciaCentral(object):
 				Fant = self.tabela[linha - 2]['F']
 			I = float(self.tabela[linha - 1]['I'])
 			fimd = float(self.tabela[linha - 1]['fi'])
-			Ik = self.Tabela.Ik
+			Ik = self.Dados.Ik
 			Md = I + (((posicao - Fant)/fimd)*Ik)
 			return Md
 	
@@ -314,19 +359,19 @@ class MedidaTendenciaCentral(object):
 
 class MedidaDeDispercao(object):
 	def __init__(self, dados):
+	        self.dados = dados
 		self.tipo = dados.tipo
 		self.tabela = dados.Tabela.tabela
-		self.media = dados.Dispercao.Media
 
 	@property
 	def variancia(self):
 		soma = 0
 		n = 0
-		for i in self.tabela:
-			soma += pow(i['xi'] - self.media, 2) * i['fi']
+		for i in self.dados.Tabela.tabela:
+			soma += pow(i['xi'] - self.dados.TendenciaCentral.Media, 2) * i['fi']
 			n += i['fi']
 		if self.tipo == "Amostra":
-			n -+ 1;
+			n -= 1;
 		return float(soma) / float(n)
 
 	@property
@@ -335,8 +380,16 @@ class MedidaDeDispercao(object):
 
 	@property
 	def cv(self):
-		return 100 * float(self.dp)/float(self.media)
+		return 100 * float(self.dp)/float(self.dados.TendenciaCentral.Media)
 
+	def Imprimir(self):
+	    print "        +---------------------------------------------+"
+            print "        +----->       Medidas de Dispesão       <-----+"
+            print "        +---------------------------------------------+"
+            print "        |  -> Variância:   %15.8f            |" % self.variancia
+            print "        |  -> Desvio Padrão: %15.8f          |" % self.dp
+            print "        |  -> Coefifiente de Variação: %15.8f|" % self.cv
+            print "        +---------------------------------------------+"
 
 if __name__ == '__main__':
 	main()
